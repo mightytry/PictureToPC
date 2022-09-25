@@ -34,8 +34,6 @@ namespace Forms
 
             float f = GetFactor(image, maxSize);
 
-            Console.WriteLine("Resize factor: " + f);
-
             CvInvoke.Resize(image, image, new Size(0, 0), f, f);
 
             Mat gray = new(new Size(img.Width, img.Height), Emgu.CV.CvEnum.DepthType.Cv8U, 1);
@@ -44,19 +42,18 @@ namespace Forms
 
             CvInvoke.CvtColor(image, gray, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
 
-            CvInvoke.MedianBlur(gray, gray, 9);
-
-            CvInvoke.Canny(gray, gray, 30, 50, 3);
+            CvInvoke.GaussianBlur(gray, gray, new Size(7,7), 0);
 
             VectorOfVectorOfPoint contours = new();
 
+            CvInvoke.AdaptiveThreshold(gray, gray, 255, Emgu.CV.CvEnum.AdaptiveThresholdType.GaussianC, Emgu.CV.CvEnum.ThresholdType.Binary, 69, 0);
 
-            CvInvoke.FindContours(gray, contours, null, mode: Emgu.CV.CvEnum.RetrType.List, method: Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxNone);
+            CvInvoke.FindContours(gray, contours, null, mode: Emgu.CV.CvEnum.RetrType.Tree, method: Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxNone);
 
 
-            CvInvoke.DrawContours(image, contours, -1, new MCvScalar(255, 0, 0));
+            CvInvoke.DrawContours(image, contours, -1, new MCvScalar(255, 255, 255));
 
-            CvInvoke.Imwrite("lol.png", image);
+            CvInvoke.Imwrite("lol.png", gray);
 
             //sort the contours by arcLenght
             List<VectorOfPoint> sortedContours = new();
@@ -73,7 +70,7 @@ namespace Forms
                 VectorOfPoint approx = new();
                 CvInvoke.ApproxPolyDP(contour, approx, CvInvoke.ArcLength(contour, true) * 0.02, true);
 
-                if (approx.Size == 4)
+                if (approx.Size >= 4 && approx.Size <= 10)
                 {
                     Point[] corners = approx.ToArray();
 
