@@ -217,7 +217,6 @@
             this.label5.TabIndex = 29;
             this.label5.Text = "None";
             this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.label5.Click += new System.EventHandler(this.label5_Click);
             // 
             // label4
             // 
