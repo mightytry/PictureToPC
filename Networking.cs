@@ -121,6 +121,12 @@ namespace PictureToPC
                     return;
                 }
 
+                if (pictureData.Length == 0)
+                {
+                    Loop();
+                    return;
+                }
+
                 string[] pdl = pictureData.Split(',');
 
                 int s = int.Parse(pdl[0]);

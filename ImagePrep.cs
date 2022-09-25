@@ -52,15 +52,18 @@ namespace PictureToPC
             CvInvoke.FindContours(gray, contours, null, mode: Emgu.CV.CvEnum.RetrType.Tree, method: Emgu.CV.CvEnum.ChainApproxMethod.ChainApproxNone);
 
 
-            CvInvoke.DrawContours(image, contours, -1, new MCvScalar(255, 255, 255));
+            //CvInvoke.DrawContours(image, contours, -1, new MCvScalar(255, 255, 255));
 
-            _ = CvInvoke.Imwrite("lol.png", gray);
+            //_ = CvInvoke.Imwrite("lol.png", gray);
 
             //sort the contours by arcLenght
             List<VectorOfPoint> sortedContours = new();
             for (int i = 0; i < contours.Size; i++)
             {
-                sortedContours.Add(contours[i]);
+                if (CvInvoke.ContourArea(contours[i]) > 10000*f)
+                {
+                    sortedContours.Add(contours[i]);
+                }
             }
             sortedContours.Sort((a, b) => CvInvoke.ArcLength(a, true).CompareTo(CvInvoke.ArcLength(b, true)));
             sortedContours.Reverse();
