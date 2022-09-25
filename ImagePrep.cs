@@ -1,9 +1,10 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using Forms;
 using Point = System.Drawing.Point;
 
-namespace Forms
+namespace PictureToPC
 {
     internal static class ImagePrep
     {
@@ -28,9 +29,9 @@ namespace Forms
         }
         public static List<Point[]> getCorners(Image img, int maxSize)
         {
-            List<Point[]> result = new List<Point[]>();
+            List<Point[]> result = new();
 
-            Mat image = BitmapExtension.ToMat(img as Bitmap);
+            Mat image = (img as Bitmap).ToMat();
 
             float f = GetFactor(image, maxSize);
 
@@ -42,7 +43,7 @@ namespace Forms
 
             CvInvoke.CvtColor(image, gray, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
 
-            CvInvoke.GaussianBlur(gray, gray, new Size(7,7), 0);
+            CvInvoke.GaussianBlur(gray, gray, new Size(7, 7), 0);
 
             VectorOfVectorOfPoint contours = new();
 
@@ -53,7 +54,7 @@ namespace Forms
 
             CvInvoke.DrawContours(image, contours, -1, new MCvScalar(255, 255, 255));
 
-            CvInvoke.Imwrite("lol.png", gray);
+            _ = CvInvoke.Imwrite("lol.png", gray);
 
             //sort the contours by arcLenght
             List<VectorOfPoint> sortedContours = new();
@@ -70,13 +71,13 @@ namespace Forms
                 VectorOfPoint approx = new();
                 CvInvoke.ApproxPolyDP(contour, approx, CvInvoke.ArcLength(contour, true) * 0.02, true);
 
-                if (approx.Size >= 4 && approx.Size <= 10)
+                if (approx.Size is >= 4 and <= 10)
                 {
                     Point[] corners = approx.ToArray();
 
 
                     result.Add(sortPointResize(img, corners, f));
-                     
+
                 }
             }
 
@@ -119,7 +120,7 @@ namespace Forms
 
         public static Image Crop(Image img, Point[] Corners)
         {
-            Mat mat = Emgu.CV.BitmapExtension.ToMat(img as Bitmap);
+            Mat mat = (img as Bitmap).ToMat();
 
             Point tl = new(Corners[0].X, Corners[0].Y);
             Point tr = new(Corners[1].X, Corners[1].Y);
@@ -141,7 +142,7 @@ namespace Forms
 
             CvInvoke.WarpPerspective(mat, dst, CvInvoke.GetPerspectiveTransform(new PointF[] { tl, tr, bl, br }, new PointF[] { new Point(0, 0), new Point(maxWidth, 0), new Point(0, maxHeight), new Point(maxWidth, maxHeight) }), new Size(maxWidth, maxHeight));
 
-            return Emgu.CV.BitmapExtension.ToBitmap(dst);
+            return dst.ToBitmap();
         }
         private static int getShape(Size size, float devidor)
         {
@@ -158,15 +159,13 @@ namespace Forms
         {
             float f = GetFactor(img.Size, Form1.InternalResulution);
 
-            Mat image = BitmapExtension.ToMat(img as Bitmap);
+            Mat image = (img as Bitmap).ToMat();
 
             Mat small = new(new Size((int)(image.Width * f), (int)(image.Height * f)), Emgu.CV.CvEnum.DepthType.Cv8U, 3);
 
             CvInvoke.Resize(image, small, new Size(0, 0), f, f);
 
             Mat gray = new(new Size(small.Width, small.Height), Emgu.CV.CvEnum.DepthType.Cv8U, 1);
-
-            CvInvoke.GaussianBlur(small, small, new Size(getShape(small.Size, 400), getShape(small.Size, 400)), 0);
 
             CvInvoke.CvtColor(small, gray, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
 
@@ -189,7 +188,7 @@ namespace Forms
             image.SetTo(new MCvScalar(255, 255, 255), thresh1);
 
 
-            return BitmapExtension.ToBitmap(image);
+            return image.ToBitmap();
         }
     }
 }

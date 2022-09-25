@@ -1,5 +1,4 @@
-using System.Windows.Forms;
-using static Emgu.Util.Platform;
+using PictureToPC;
 
 namespace Forms
 {
@@ -12,20 +11,18 @@ namespace Forms
         public static int InternalResulution;
         public static int OutputResulution;
         private readonly List<Image> imageQueue;
-        private readonly List<Image> images;
-        private static readonly int[] ResulutionIndex = new int[]{ 1920, 2560, 3840 };
+        private static readonly int[] ResulutionIndex = new int[] { 1920, 2560, 3840 };
+        private readonly Config Config;
 
-        Config Config;
-        
         public Form1()
         {
             InitializeComponent();
 
-            Server server = new Server(42069, this);
+            Server server = new(42069, this);
 
             Thread network = new(new ThreadStart(new Action(() => { server.Loop(); })));
 
-            Config = new(); 
+            Config = new();
 
             network.Start();
 
@@ -36,25 +33,31 @@ namespace Forms
             UpEvent = new Dictionary<Button, MouseEventHandler>();
 
             imageQueue = new List<Image>();
-            images = new List<Image>();
 
             Resize += new EventHandler(ResizeMarkers);
 
-            FormClosed += new FormClosedEventHandler((o, t) => { server.Close();});
+            FormClosed += new FormClosedEventHandler((o, t) => { server.Close(); });
         }
         private void GetCorners()
         {
-            var corners = ImagePrep.getCorners(pictureBox1.Image, InternalResulution);
-            if (corners.Count == 0) return;
+            List<Point[]> corners = ImagePrep.getCorners(pictureBox1.Image, InternalResulution);
+            if (corners.Count == 0)
+            {
+                return;
+            }
+
             CornersList = corners;
-            if (CornersList.Count > 1) ActiveCorner = 1;
-            else ActiveCorner = 0;
+            ActiveCorner = CornersList.Count > 1 ? 1 : 0;
             Invoke(new Action(() => { ResizeMarkers(null, null); }));
 
         }
         private void ResizeMarkers(object? sender, EventArgs? e)
         {
-            if (CornersList == null || CornersList.Count == 0) return;
+            if (CornersList == null || CornersList.Count == 0)
+            {
+                return;
+            }
+
             put_marker(button6, CornersList[ActiveCorner][0]);
             put_marker(button7, CornersList[ActiveCorner][1]);
             put_marker(button8, CornersList[ActiveCorner][2]);
@@ -103,12 +106,12 @@ namespace Forms
             button2_Click(null, null);
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void button3_Click(object? sender, EventArgs? e)
         {
             pictureBox1.Image = ImagePrep.Contrast(pictureBox1.Image);
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object? sender, EventArgs? e)
         {
             float f = ImagePrep.GetFactor(pictureBox1.Image.Size, OutputResulution);
 
@@ -127,12 +130,7 @@ namespace Forms
             }
         }
 
-        public void SetLabel5(string msg)
-        {
-            label5.Text = msg;
-        }
-
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object? sender, EventArgs? e)
         {
             pictureBox1.Image = ImagePrep.Crop(pictureBox1.Image, CornersList[ActiveCorner]);
         }
@@ -174,16 +172,9 @@ namespace Forms
         {
             float[] rao = getRatioAndOffset(pictureBox1.Image.Size, pictureBox1.Size);
 
-            Point pos = new Point((int)((point.X * rao[0]) + rao[1]), (int)((point.Y * rao[0]) + rao[2]));
+            Point pos = new((int)((point.X * rao[0]) + rao[1]), (int)((point.Y * rao[0]) + rao[2]));
 
-            if (pos.X > 0 && pos.Y > 0 && pos.X < Size.Width - 30 && pos.Y < Size.Height - 50)
-            {
-                marker.Location = pos;
-            }
-            else
-            {
-                marker.Location = new Point(0, 0);
-            }
+            marker.Location = pos.X > 0 && pos.Y > 0 && pos.X < Size.Width - 30 && pos.Y < Size.Height - 50 ? pos : new Point(0, 0);
 
 
         }
@@ -200,15 +191,8 @@ namespace Forms
         private new void Move(Button button)
         {
             Point pos = PointToClient(MousePosition);
-            if (pos.X > 0 && pos.Y > 0 && pos.X < Size.Width - 30 && pos.Y < Size.Height- 50)
-            {
-                button.Location = pos;
-            }
-            else
-            {
-                button.Location = new Point(0, 0);
-            }
-                
+            button.Location = pos.X > 0 && pos.Y > 0 && pos.X < Size.Width - 30 && pos.Y < Size.Height - 50 ? pos : new Point(0, 0);
+
         }
 
         private void FollowMouse(Button button)
@@ -258,7 +242,11 @@ namespace Forms
         private void button11_Click(object sender, EventArgs e)
         {
             //prev
-            if (CornersList == null) return;
+            if (CornersList == null)
+            {
+                return;
+            }
+
             if (ActiveCorner > 0)
             {
                 ActiveCorner--;
@@ -270,7 +258,11 @@ namespace Forms
         private void button10_Click(object sender, EventArgs e)
         {
             //next
-            if (CornersList == null) return;
+            if (CornersList == null)
+            {
+                return;
+            }
+
             if (ActiveCorner < CornersList.Count - 1)
             {
                 ActiveCorner++;
@@ -278,9 +270,9 @@ namespace Forms
             }
         }
 
-        private void label3_Click(object sender, EventArgs e)
+        internal void SetLabel5(string v)
         {
-
+            label5.Text = v;
         }
     }
 

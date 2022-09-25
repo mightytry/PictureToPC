@@ -1,13 +1,12 @@
 ﻿using Emgu.CV;
-using System;
+using Forms;
 using System.Drawing.Imaging;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Forms
+namespace PictureToPC
 {
     internal static class Networking
     {
@@ -47,12 +46,12 @@ namespace Forms
             if (connected)
             {
                 try { bytesRead = stream.Read(buffer, 0, client.ReceiveBufferSize); }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Close();
                     return null;
                 }
-                
+
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead);
             }
             return null;
@@ -67,7 +66,7 @@ namespace Forms
                 {
                     try
                     { bytesRead += stream.Read(data, bytesRead, size - bytesRead); }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         Close();
                         return null;
@@ -80,9 +79,21 @@ namespace Forms
         public void Close()
         {
 
-            if (listener != null) listener.Stop();
-            if (stream != null) stream.Close();
-            if (client != null) client.Close();
+            if (listener != null)
+            {
+                listener.Stop();
+            }
+
+            if (stream != null)
+            {
+                stream.Close();
+            }
+
+            if (client != null)
+            {
+                client.Close();
+            }
+
             connected = false;
 
         }
@@ -93,7 +104,7 @@ namespace Forms
             {
                 client = listener.AcceptTcpClient();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return;
             }
@@ -105,7 +116,11 @@ namespace Forms
             {
                 Send("ready");
                 string? pictureData = Receive();
-                if (pictureData == null) return;
+                if (pictureData == null)
+                {
+                    return;
+                }
+
                 string[] pdl = pictureData.Split(',');
 
                 int s = int.Parse(pdl[0]);
@@ -116,7 +131,10 @@ namespace Forms
 
                 Send("ready");
                 byte[]? pictureBytes = Receive(s);
-                if (pictureBytes == null) return;
+                if (pictureBytes == null)
+                {
+                    return;
+                }
 
                 Bitmap im = new(width / 4, height, width,
                     PixelFormat.Format32bppArgb,
@@ -125,14 +143,14 @@ namespace Forms
                 im.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
 
-                Mat mat = BitmapExtension.ToMat(im);
+                Mat mat = im.ToMat();
 
                 Mat dst = new(im.Size, Emgu.CV.CvEnum.DepthType.Cv8U, 3);
 
                 CvInvoke.CvtColor(mat, dst, Emgu.CV.CvEnum.ColorConversion.Rgba2Bgr);
 
-                Image img = BitmapExtension.ToBitmap(dst);
-                
+                Image img = dst.ToBitmap();
+
                 form.SetImg(img);
 
             }

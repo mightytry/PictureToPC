@@ -1,11 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Forms
+namespace PictureToPC
 {
     internal class Config
     {
@@ -35,7 +30,7 @@ namespace Forms
             //check if file and folder exist
             if (!File.Exists(FilePath))
             {
-                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\" + FolderName);
+                _ = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\" + FolderName);
                 File.Create(FilePath).Close();
                 Data = new Data();
                 save();

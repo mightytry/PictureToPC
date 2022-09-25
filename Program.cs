@@ -1,4 +1,6 @@
-namespace Forms
+using Forms;
+
+namespace PictureToPC
 {
     internal static class Program
     {

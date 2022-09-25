@@ -239,7 +239,6 @@
             this.label3.TabIndex = 27;
             this.label3.Text = "Corner Selection";
             this.label3.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // button11
             // 
