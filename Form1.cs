@@ -12,6 +12,7 @@ namespace Forms
         public static int InternalResulution;
         public static int OutputResulution;
         private readonly List<Image> imageQueue;
+        private readonly List<Image> images;
         private static readonly int[] ResulutionIndex = new int[]{ 1920, 2560, 3840 };
 
         Config Config;
@@ -35,6 +36,7 @@ namespace Forms
             UpEvent = new Dictionary<Button, MouseEventHandler>();
 
             imageQueue = new List<Image>();
+            images = new List<Image>();
 
             Resize += new EventHandler(ResizeMarkers);
 
@@ -269,6 +271,11 @@ namespace Forms
                 ActiveCorner++;
                 ResizeMarkers(null, null);
             }
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

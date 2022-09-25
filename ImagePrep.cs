@@ -166,6 +166,8 @@ namespace Forms
 
             Mat gray = new(new Size(small.Width, small.Height), Emgu.CV.CvEnum.DepthType.Cv8U, 1);
 
+            CvInvoke.GaussianBlur(small, small, new Size(getShape(small.Size, 400), getShape(small.Size, 400)), 0);
+
             CvInvoke.CvtColor(small, gray, Emgu.CV.CvEnum.ColorConversion.Rgb2Gray);
 
             Mat thresh1 = new(new Size(small.Width, small.Height), Emgu.CV.CvEnum.DepthType.Cv8U, 1);
