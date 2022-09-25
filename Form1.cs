@@ -127,6 +127,11 @@ namespace Forms
             }
         }
 
+        public void SetLabel5(string msg)
+        {
+            label5.Text = msg;
+        }
+
         private void button4_Click(object sender, EventArgs e)
         {
             pictureBox1.Image = ImagePrep.Crop(pictureBox1.Image, CornersList[ActiveCorner]);

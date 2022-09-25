@@ -30,7 +30,7 @@ namespace Forms
             addressList = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
             listener = new TcpListener(localaddr: addressList[^1], port);
             listener.Start();
-            Console.WriteLine(listener.LocalEndpoint);
+            form.SetLabel5(listener.LocalEndpoint.ToString().Split(':')[0]);
             this.form = form;
         }
         public void Send(string message)
