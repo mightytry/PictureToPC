@@ -47,15 +47,21 @@ namespace PictureToPC
     {
         public int InternalResulutionIndex;
         public int OutputResulutionIndex;
-        internal Data(int iI, int oI)
+
+        public string PartnerIpAddress;
+        internal Data(int iI, int oI, string pA)
         {
             InternalResulutionIndex = iI;
             OutputResulutionIndex = oI;
+
+            PartnerIpAddress = pA;
         }
         internal Data()
         {
             InternalResulutionIndex = 0;
             OutputResulutionIndex = 0;
+
+            PartnerIpAddress = "";
         }
     }
 }

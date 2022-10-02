@@ -7,6 +7,7 @@ namespace Forms
         private readonly Dictionary<Button, MouseEventHandler> MoveEvent;
         private readonly Dictionary<Button, MouseEventHandler> UpEvent;
         private int ActiveCorner;
+        private Server Server;
         private List<Point[]> CornersList;
         public static int InternalResulution;
         public static int OutputResulution;
@@ -18,9 +19,9 @@ namespace Forms
         {
             InitializeComponent();
 
-            Server server = new(42069, this);
+            Server = new(42069, this, UpdateProgressBar);
 
-            Thread network = new(new ThreadStart(new Action(() => { server.Loop(); })));
+            Thread network = new(new ThreadStart(new Action(() => { Server.Loop(); })));
 
             Config = new();
 
@@ -29,6 +30,8 @@ namespace Forms
             comboBox1.SelectedIndex = Config.Data.OutputResulutionIndex;
             comboBox2.SelectedIndex = Config.Data.InternalResulutionIndex;
 
+            textBox1.Text = Config.Data.PartnerIpAddress;
+
             MoveEvent = new Dictionary<Button, MouseEventHandler>();
             UpEvent = new Dictionary<Button, MouseEventHandler>();
 
@@ -36,7 +39,7 @@ namespace Forms
 
             Resize += new EventHandler(ResizeMarkers);
 
-            FormClosed += new FormClosedEventHandler((o, t) => { server.Close(); });
+            FormClosed += new FormClosedEventHandler((o, t) => { Server.Close(); });
         }
         private void GetCorners()
         {
@@ -198,6 +201,7 @@ namespace Forms
         private void FollowMouse(Button button)
         {
             groupBox1.Visible = false;
+            groupBox2.Visible = false;
             MoveEvent.Add(button, new MouseEventHandler((s, e) => Move(button)));
             UpEvent.Add(button, new MouseEventHandler((s, e) => UnfollowMouse(button)));
             button.MouseMove += MoveEvent[button];
@@ -211,7 +215,7 @@ namespace Forms
             _ = MoveEvent.Remove(button);
             _ = UpEvent.Remove(button);
             groupBox1.Visible = true;
-
+            groupBox2.Visible = true;
 
             int num = int.Parse(button.Text) - 1;
 
@@ -274,6 +278,69 @@ namespace Forms
         {
             label5.Text = v;
         }
-    }
 
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            Config.Data.PartnerIpAddress = textBox1.Text;
+        }
+
+        private void textBox1_Leave(object sender, EventArgs e)
+        {
+            Config.Save();
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            if (Server.AddSendToClient(textBox1.Text, 42069))
+            {
+                MessageBox.Show("Added");
+            }
+            else {
+                MessageBox.Show("Failed");
+            }
+        }
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void UpdateProgressBar(int i)
+        {
+            Invoke(new Action(() =>
+            {
+                progressBar1.Value = i;
+            }));
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+    }
 }
