@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "PictureToPC"
-#define MyAppVersion "1"
+#define MyAppVersion "1.01"
 #define MyAppPublisher "Mees Studio"
 #define MyAppURL "https://www.example.com/"
 #define MyAppExeName "Main.exe"
@@ -13,7 +13,7 @@
 AppId={{582EA1C6-9A2B-4CE2-8111-282AEE5DBA02}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+; AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
