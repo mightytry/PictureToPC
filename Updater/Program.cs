@@ -210,7 +210,6 @@ namespace Main
                     {
                         Process.Start("Main.exe");
                     }
-                    
                 }
                 catch (Exception e)
                 {
