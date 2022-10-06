@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
@@ -35,8 +36,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-class
-ButtonListener implements View.OnClickListener {
+class ButtonListener implements View.OnClickListener {
     Camera Handler;
 
     public ButtonListener(Camera handler){
@@ -125,8 +125,6 @@ public class Camera extends AppCompatActivity {
                 .format(System.currentTimeMillis());*/
 
 
-
-
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(new File(getExternalCacheDir(), name)).build();
 
 
@@ -134,7 +132,7 @@ public class Camera extends AppCompatActivity {
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-                        FPView.setImageURI(Uri.parse(""));
+                        FPView.setImageURI(Uri.EMPTY);
                         if (show) FPView.setImageURI(outputFileResults.getSavedUri());
                     }
 

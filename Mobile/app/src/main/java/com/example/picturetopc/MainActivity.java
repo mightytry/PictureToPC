@@ -10,11 +10,13 @@ import android.graphics.BitmapFactory;
 import android.icu.util.Calendar;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,14 +76,25 @@ class ConnSender extends Thread {
     }
 
     public void Send(Bitmap bmp){
-        int size = bmp.getRowBytes() * bmp.getHeight();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        System.out.println("1");
+
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] b = baos.toByteArray();
+        System.out.println("3");
+
+        /*int size = bmp.getRowBytes() * bmp.getHeight();
         System.out.println(size + "," + bmp.getHeight() + "," + bmp.getRowBytes());
         ByteBuffer byteBuffer = ByteBuffer.allocate(size);
         bmp.copyPixelsToBuffer(byteBuffer);
         byte[] byteArray = byteBuffer.array();
 
+
+
         Sendable.add((byteArray.length + "," + bmp.getHeight() + "," + bmp.getRowBytes()).getBytes(StandardCharsets.UTF_8));
-        Sendable.add(byteArray);
+        Sendable.add(byteArray);*/
+        Sendable.add((String.valueOf(b.length)).getBytes(StandardCharsets.UTF_8));
+        Sendable.add(b);
 
     }
 }

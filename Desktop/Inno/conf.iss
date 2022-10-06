@@ -2,15 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "PictureToPC"
-#define MyAppVersion "1.01"
+#define MyAppVersion "v0.5.1"
 #define MyAppPublisher "Mees Studio"
-#define MyAppURL "https://www.example.com/"
+#define MyAppURL "https://github.com/mightytry/PictureToPC/releases/tag/v0.5.1"
 #define MyAppExeName "Main.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{582EA1C6-9A2B-4CE2-8111-282AEE5DBA02}
+AppId={{82744DD3-2F6B-485C-8BD6-849B093FCE58}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ; AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,12 +35,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\Main.deps.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\Main.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\Main.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\Main.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC\Updater\bin\Release\net6.0\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.deps.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [UninstallDelete]

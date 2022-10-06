@@ -180,14 +180,10 @@ namespace PictureToPC
                     Loop();
                     return;
                 }
+                
+                int s = int.Parse(pictureData);
 
-                string[] pdl = pictureData.Split(',');
-
-                int s = int.Parse(pdl[0]);
-                int height = int.Parse(pdl[1]);
-                int width = int.Parse(pdl[2]);
-
-                Console.WriteLine(s + ", " + height + ", " + width);
+                Console.WriteLine(s);
 
                 Send("ready");
                 byte[]? pictureBytes = Receive(s);
@@ -197,22 +193,20 @@ namespace PictureToPC
                     return;
                 }
 
-                Bitmap im = new(width / 4, height, width,
-                    PixelFormat.Format32bppArgb,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(pictureBytes, 0));
+                Bitmap im = new Bitmap(new MemoryStream(pictureBytes));
 
                 im.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
 
-                Mat mat = im.ToMat();
+                //Mat mat = im.ToMat();
 
-                Mat dst = new(im.Size, Emgu.CV.CvEnum.DepthType.Cv8U, 3);
+                //Mat dst = new(im.Size, Emgu.CV.CvEnum.DepthType.Cv8U, 3);
 
-                CvInvoke.CvtColor(mat, dst, Emgu.CV.CvEnum.ColorConversion.Rgba2Bgr);
+                //CvInvoke.CvtColor(mat, dst, Emgu.CV.CvEnum.ColorConversion.Rgba2Bgr);
 
-                Image img = dst.ToBitmap();
+                //Image img = dst.ToBitmap();
 
-                form.SetImg(img);
+                form.SetImg(im);
 
             }
         }
