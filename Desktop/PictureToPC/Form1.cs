@@ -1,4 +1,5 @@
 using PictureToPC;
+using System.Windows.Forms;
 
 namespace Forms
 {
@@ -11,6 +12,8 @@ namespace Forms
         private List<Point[]> CornersList;
         public static int InternalResulution;
         public static int OutputResulution;
+        private Image? prevImage;
+        private Image orginalImage;
         private readonly List<Image> imageQueue;
         private static readonly int[] ResulutionIndex = new int[] { 1920, 2560, 3840 };
         private readonly Config Config;
@@ -82,16 +85,6 @@ namespace Forms
             Config.Save();
         }
 
-        private void splitContainer1_Panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void splitContainer2_Panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -127,6 +120,8 @@ namespace Forms
         {
             if (imageQueue.Count > 0)
             {
+                prevImage = pictureBox1.Image;
+                orginalImage = imageQueue[0];
                 pictureBox1.Image = imageQueue[0];
                 imageQueue.RemoveAt(0);
                 GetCorners();
@@ -235,7 +230,7 @@ namespace Forms
         {
             if (pictureBox1.Image == null)
             {
-                Invoke(new Action(() => { pictureBox1.Invalidate(); pictureBox1.Image = img; GetCorners(); }));
+                Invoke(new Action(() => { orginalImage = img;  pictureBox1.Invalidate(); pictureBox1.Image = img; GetCorners(); }));
             }
             else
             {
@@ -341,6 +336,24 @@ namespace Forms
         private void Form1_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            pictureBox1.Image = orginalImage;
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            // Prev image
+            if (prevImage != null)
+            {
+                imageQueue.Insert(0, pictureBox1.Image);
+                orginalImage = prevImage;
+                pictureBox1.Image = prevImage;
+                prevImage = null;
+                GetCorners();
+            }
         }
     }
 }
