@@ -1,131 +1,40 @@
-﻿using System.Diagnostics;
-using System.Net.Sockets;
-using System.Security.Cryptography;
+﻿using Newtonsoft.Json;
+using System.Diagnostics;
+using System.IO.Compression;
+using System.Net;
 using System.Security.Principal;
-using System.Text;
-using static Main.Messages;
-using File = Main.Messages.File;
-using FileInfo = Main.Messages.FileInfo;
 
 namespace Main
 {
-    internal static class Program
+    public class Commit
     {
-        private const string DirName = "Update";
+        public string sha { get; set; }
+        public string url { get; set; }
+    }
 
+    public class Root
+    {
+        public string name { get; set; }
+        public string zipball_url { get; set; }
+        public string tarball_url { get; set; }
+        public Commit commit { get; set; }
+        public string node_id { get; set; }
+    }
+
+
+
+
+    internal static class Program 
+    {
+        private static string _versionId = null;
         private static bool? _isRunningAsAdmin = null;
 
-        private static bool _startOnFinish = false;
+        private static readonly HttpClient client = new HttpClient();
 
-        private static List<File> LoadData()
-        {
-            var Files = new List<File>();
-
-            var files = Directory.GetFiles("./", "*", SearchOption.AllDirectories);
-
-            foreach (var file in files)
-            {
-                using (var sha512 = SHA512.Create())
-                {
-                    using (var stream = System.IO.File.OpenRead(file))
-                    {
-                        string fileName = file.Replace("\\", "/");
-                        Files.Add(new File(Path.GetFileName(fileName), Path.GetDirectoryName(fileName).Replace("\\", "/"), BitConverter.ToString(sha512.ComputeHash(stream)).Replace("-", "").ToLower()));
-                    }
-                }
-            }
-            return Files;
-        }
-
-        private static void Send<T>(Stream stream, Message<T> message)
-        {
-            var json = message.ToJson();
-            var data = Encoding.UTF8.GetBytes(json);
-
-            try {
-                stream.Write(BitConverter.GetBytes(data.Length));
-                stream.Write(data, 0, data.Length);
-            }
-            catch { Exit(); }
-        }
-
-        private static byte[] GetFileData(Stream stream, File file)
-        {
-            Send(stream, new Message<File>(MessageId.GetFile, file));
-
-            Message<byte[]> message = Recieve<byte[]>(stream);
-
-            return message.DATA;
-        }
-        
-        private static Message<T> Recieve<T>(Stream stream)
-        {
-            var data = new byte[4];
-            if (stream.Read(data, 0, 4) == -1) Exit();
-            var length = BitConverter.ToInt32(data, 0);
-
-            data = new byte[length];
-            int read = 0;
-            
-            while (read != length)
-            {
-                int r = stream.Read(data, read, length - read);
-                if (r == -1) Exit();
-                read += r;
-                
-            }
-
-            var json = Encoding.UTF8.GetString(data);
-            return Message<T>.FromJson(json);
-        }
-        private static void checkIsUpdateEmpty()
-        {
-#if !DEBUG
-            try
-            {
-#endif
-                string[] files = Directory.GetFiles(DirName, "*", SearchOption.AllDirectories);
-
-                if (files.Length == 0) return;
-
-                foreach (var file in files)
-                {
-#if !DEBUG
-                    try
-                    {
-#endif
-                    CheckPermission();
-
-                        string newPos = file.Replace(DirName, ".");
-
-                        if (!Directory.Exists(Path.GetDirectoryName(newPos)))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(newPos));
-                        }
-
-                        if (System.IO.File.Exists(newPos))
-                        {
-                            System.IO.File.Delete(newPos);
-                        }
+        public const string Author = "mightytry";
+        public const string Repository = "PictureToPC";
 
 
-                        System.IO.File.Move(file, newPos);
-#if !DEBUG
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-#endif
-                }
-#if !DEBUG
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-#endif
-        }
         private static void CheckPermission()
         {
             if (_isRunningAsAdmin == null)
@@ -139,91 +48,133 @@ namespace Main
                     _isRunningAsAdmin = true;
                 }
             }
-            else if (_isRunningAsAdmin == false)
+            if (_isRunningAsAdmin == false)
             {
                 ExecuteAsAdmin("Main.exe");
                 Environment.Exit(0);
             }
         }
-            
+        private static void Get_Version()
+        {
+            try
+            {
+                if (_versionId == null)
+                {
+                    _versionId = File.ReadAllText("version");
+                }
+            }
 
-        private static void Main()
+            catch (Exception)
+            {
+                _versionId = "0";
+                File.Create("version").Close();
+            }
+        }
+
+        private static string Get_Online_Version(string url)
+        {
+#if !DEBUG
+            try
+            {
+#endif  
+            string response = client.GetStringAsync(url).Result;
+            Root[] myDeserializedClass = JsonConvert.DeserializeObject<Root[]>(response);
+            return myDeserializedClass[0].name;
+#if !DEBUG
+            }
+            catch (Exception)
+            {
+                return "0";
+            }
+#endif
+        }
+
+        private static void Get_Zip(string url, string path)
         {
 #if !DEBUG
             try
             {
 #endif
-                CheckPermission();
-                checkIsUpdateEmpty();
 
-                try
+            Console.WriteLine(url);
+            client.GetStreamAsync(url).ContinueWith((task) =>
+            {
+                using (var stream = task.Result)
                 {
-                    Process.Start("PictureToPC.exe");
-                    _startOnFinish = false;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    _startOnFinish = true;
-                }
-                
-
-                Console.WriteLine("Starting Updater");
-
-                var Client = new TcpClient("meesstudio.ddns.net", 42069);
-
-                Console.WriteLine("Connected to server");
-
-                var Stream = Client.GetStream();
-
-                var Message = new Message<FileInfo>(MessageId.FileInfo, new FileInfo(LoadData()));
-
-                Send(Stream, Message);
-
-                Console.WriteLine("Sent file info");
-
-
-                var Response = Recieve<FileInfo>(Stream).DATA;
-
-                if (Response.Files.Count == 0) Exit();
-
-                CheckPermission();
-
-                foreach (File file in Response.Files)
-                {
-                    byte[] data = GetFileData(Stream, file);
-
-                    Console.WriteLine($"Recieved file {file.Name} in {file.Directory}");
-
-                    if (file.Directory != "./" && !Directory.Exists(Path.Combine(DirName, file.Directory)))
+                    using (var archive = new ZipArchive(stream))
                     {
-                        Directory.CreateDirectory(Path.Combine(DirName, file.Directory));
-                    }
-                    
-                    if (file.Name.Equals(string.Empty)) continue;
-
-                    System.IO.File.WriteAllBytes(Path.Combine(DirName, file.Directory, file.Name), data);
-                }
-                try
-                {
-                    if (_startOnFinish)
-                    {
-                        Process.Start("Main.exe");
+                        archive.ExtractToDirectory(path);
                     }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+            }).Wait();
 #if !DEBUG
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
+                return;
             }
 #endif
-            Exit();
+        }
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            //Now Create all of the directories
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
 
+            //Copy all the files & Replaces any files with the same name
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
+        private static void Main()
+        {
+            client.DefaultRequestHeaders.Add("User-Agent", Repository);
+
+
+            //url = https://github.com/mightytry/PictureToPC/releases/latest/download/Exe.zip
+
+            if (Directory.Exists("Update"))
+            {
+                 CopyFilesRecursively("Update", "Exe");
+                 Directory.Delete("Update", true);
+            }
+
+            Get_Version();
+
+            if (_versionId != "0")
+            {
+                Process.Start("Exe\\PictureToPC.exe");
+            }
+
+            string onlineVersion = Get_Online_Version($"https://api.github.com/repos/{Author}/{Repository}/tags");
+
+            Console.WriteLine($"Online Version: {onlineVersion}");
+
+            if (onlineVersion != _versionId)
+            {
+                CheckPermission();
+
+                if (_versionId == "0")
+                {
+                    Get_Zip($"https://github.com/{Author}/{Repository}/releases/download/v0.0.0/x64.zip", "Update");
+                }
+
+                Get_Zip($"https://github.com/{Author}/{Repository}/releases/latest/download/Exe.zip", "Update");
+
+                if (_versionId == "0")
+                {
+                    CopyFilesRecursively("Update", "Exe");
+                    Process.Start("Exe\\PictureToPC.exe");
+                    Directory.Delete("Update", true);
+                }
+
+                File.WriteAllText("version", onlineVersion);
+
+            }
 
         }
 

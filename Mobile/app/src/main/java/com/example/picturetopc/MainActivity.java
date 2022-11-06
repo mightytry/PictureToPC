@@ -1,69 +1,182 @@
 package com.example.picturetopc;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.icu.util.Calendar;
-import android.os.AsyncTask;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.util.Base64;
+import android.os.Debug;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.*;
-import java.nio.ByteBuffer;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 
+class ConnHanlder extends Thread {
+    MulticastSocket socket;
 
-class ConnSender extends Thread {
-    ConnListener Listener;
+    InetAddress ip;
+    int port;
 
-    List<byte[]> Sendable;
+    EditText code;
 
-    public ConnSender(ConnListener listener){
-        Listener = listener;
+
+    public ConnHanlder(String _ip, int _port, EditText _code) throws IOException{
+        socket = new MulticastSocket();
+        ip = InetAddress.getByName(_ip);
+        socket.joinGroup(ip);
+        socket.setTimeToLive(20);
+
+
+        port = _port;
+
+        code = _code;
     }
 
     public void run() {
-        Sendable = new ArrayList<>();
+        socket.connect(ip, port);
 
-        while (!Listener.Stop){
+        while (true) {
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            if (!Listener.Blocked){
-                SendAll();
+            String msg = null;
+
+
+            msg = "{\"code\": \"" + code.getText().toString() + "\", \"ip\": \"" + "0" + "\", \"port\":" + 42069 + "}";
+
+
+            DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(), msg.getBytes().length, this.ip, this.port);
+
+
+            try {
+                socket.send(msgPacket);
+            } catch (IOException e) {
+                run();
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+class ConnListener extends Thread
+{
+    ServerSocket socket;
+    ProgressBar progressBar;
+    List<Connection> connections;
+
+    Button button;
+
+    public ConnListener(ProgressBar _progressBar, Button _button) throws IOException{
+        socket = new ServerSocket(42069);
+        progressBar = _progressBar;
+
+        connections = new ArrayList<>();
+
+        button = _button;
+    }
+
+    public void run(){
+        while (socket != null){
+            try {
+                connections.add(new Connection(socket.accept(), this));
+                button.setText("Connected: " + connections.size());
+            } catch (IOException e) {
+                run();
+                return;
             }
         }
     }
 
+    public void Disconnect(Connection connection) {
+        connections.remove(connection);
+        button.setText("Connected: " + connections.size());
+    }
+
+    public void SendAll(Bitmap pic) {
+        for (Connection conn:
+                connections) {
+            conn.Send(pic);
+        }
+    }
+
+    public void DisconnectAll() {
+        for (Connection conn:
+                connections) {
+            conn.Disconnect();
+        }
+    }
+}
+
+class ConnSender extends Thread {
+    Connection Listener;
+
+    List<byte[]> Sendable;
+
+    public ConnSender(Connection listener){
+        Sendable = new ArrayList<>();
+        Listener = listener;
+    }
+
+    public void run() {
+        while (!Listener.Stop){
+            SendAll();
+        }
+    }
 
 
     private void SendAll() {
-        if (Sendable.isEmpty()) return;
-
-        Listener.Blocked = !Listener.Blocked;
+        if (Sendable.isEmpty()) {
+            try {
+                sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
 
         int size = 32768;
-
         byte[] send = Sendable.remove(0);
 
-        Listener.Callable.Handler.ProgressBar.setMax(send.length);
+        Listener.ConnListener.progressBar.setMax(send.length);
         try {
             for (int i = 0; i < send.length; i += size) {
-                Listener.Callable.Handler.ProgressBar.setProgress(i);
+                Listener.ConnListener.progressBar.setProgress(i);
                 int to = i + size;
                 if (i + size >= send.length) to = send.length;
                 byte[] data = Arrays.copyOfRange(send, i, to);
@@ -74,25 +187,17 @@ class ConnSender extends Thread {
             return;
         }
     }
+    public void KeepAlive(){
+        final byte[] b = "-1".getBytes(StandardCharsets.UTF_8);
+        Sendable.add(b);
+    }
 
     public void Send(Bitmap bmp){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        System.out.println("1");
 
         bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] b = baos.toByteArray();
-        System.out.println("3");
 
-        /*int size = bmp.getRowBytes() * bmp.getHeight();
-        System.out.println(size + "," + bmp.getHeight() + "," + bmp.getRowBytes());
-        ByteBuffer byteBuffer = ByteBuffer.allocate(size);
-        bmp.copyPixelsToBuffer(byteBuffer);
-        byte[] byteArray = byteBuffer.array();
-
-
-
-        Sendable.add((byteArray.length + "," + bmp.getHeight() + "," + bmp.getRowBytes()).getBytes(StandardCharsets.UTF_8));
-        Sendable.add(byteArray);*/
         Sendable.add((String.valueOf(b.length)).getBytes(StandardCharsets.UTF_8));
         Sendable.add(b);
 
@@ -102,9 +207,9 @@ class ConnSender extends Thread {
 
 class ConnReader extends Thread
 {
-    ConnListener Listener;
+    Connection Listener;
 
-    public ConnReader(ConnListener listener){
+    public ConnReader(Connection listener){
         Listener = listener;
     }
 
@@ -125,7 +230,7 @@ class ConnReader extends Thread
 
                 switch (msg){
                     case "ready":
-                        Listener.Blocked = false;
+                        //Listener.Blocked = false;
                         break;
 
                     default:
@@ -141,109 +246,90 @@ class ConnReader extends Thread
     }
 }
 
-class ConnListener extends AsyncTask {
-    String Ip;
-    int Port = 42069;
+class ConnTimeout extends Thread {
+    ConnSender Sender;
+
+    public ConnTimeout(ConnSender sender){
+        Sender = sender;
+    }
+
+    public void run() {
+        while (!Sender.Listener.Stop){
+            SendAll();
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
+    private void SendAll() {
+        Sender.KeepAlive();
+    }
+}
+
+class Connection {
     Socket Socket;
     InputStream Input;
     OutputStream Output;
 
-    boolean Blocked;
-
-    ConnReader Reader;
+    //ConnReader Reader;
     ConnSender Sender;
 
+    ConnTimeout Timeout;
 
 
-    Connection Callable;
+
+    ConnListener ConnListener;
     boolean Stop;
 
-    public ConnListener(String ip, Connection callable){
-        Ip = ip;
-        Callable = callable;
+    public Connection(Socket socket, ConnListener connListener) throws SocketException {
+        Socket = socket;
+        socket.setSoTimeout(1*1000);
+        ConnListener = connListener;
 
         Stop = false;
-        Blocked = true;
-    }
 
-
-    @Override
-    protected Object doInBackground(Object[] objects) {
         try {
-            Socket = new Socket();
-            Socket.connect(new InetSocketAddress(Ip, Port), 1000);
-
             Input = Socket.getInputStream();
-
             Output = Socket.getOutputStream();
 
-            Callable.OnMessage("hi");
-        }
-        catch(Exception e)
-        {
-            Disconnect();
-            return null;
+        } catch (IOException e) {
+            return;
         }
 
-        Reader = new ConnReader(this);
+        //Reader = new ConnReader(this);
         Sender = new ConnSender(this);
 
-        Reader.start();
+        Timeout = new ConnTimeout(Sender);
+
+        //Reader.start();
         Sender.start();
 
-        return null;
-    }
-
-
-
-    public void Disconnect(){
-        Callable.OnDisconnect();
+        Timeout.start();
     }
 
     public void Send(Bitmap bmp){
         Sender.Send(bmp);
     }
 
-}
-
-
-class Connection {
-    IoHandler Handler;
-    String Ip;
-
-    ConnListener Listener;
-
-    public Connection(String ip, IoHandler handler){
-        Ip = ip;
-        Handler = handler;
-    }
-
-    public void Connect(){
-        Listener = new ConnListener(Ip, this);
-
-        Listener.execute();
-    }
-
-    public void OnMessage(String msg)
-    {
-        if (msg == "hi"){
-            Handler.Message(0);
-        }
-    }
-
-    public void OnDisconnect() {
-        Handler.Message(1);
+    public void Disconnect() {
         try {
-            Listener.Socket.close();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        Listener.Stop = true;
-    }
+            Socket.close();}
+        catch (IOException e)
+        {}
+        Stop = true;
 
+            //Sender.join();
+            //Reader.join();
+
+        ConnListener.Disconnect(this);
+    }
 }
+
+
 
 class Listener implements View.OnClickListener {
     IoHandler Handler;
@@ -261,18 +347,16 @@ class Listener implements View.OnClickListener {
 
 
 class IoHandler {
-    String Ip;
     SharedPreferences.Editor Editor;
     EditText EditText;
     Button Button;
     ProgressBar ProgressBar;
     MainActivity Main;
 
-    Connection Conn;
-    private boolean connected;
+    ConnHanlder connHanlder;
+    ConnListener connListener;
 
-    public IoHandler(String ip, SharedPreferences.Editor editor, EditText editText, Button button, ProgressBar progessBar, MainActivity main){
-        Ip = ip;
+    public IoHandler(String code, SharedPreferences.Editor editor, EditText editText, Button button, ProgressBar progessBar, MainActivity main){
         Editor = editor;
         EditText = editText;
         Button = button;
@@ -280,12 +364,20 @@ class IoHandler {
         Main = main;
 
         button.setOnClickListener(new Listener(this));
-        connected = false;
-        Load();
+        Load(code);
 
+        try {
+            connHanlder = new ConnHanlder("224.69.69.69", 42069, EditText);
+            connListener = new ConnListener(ProgressBar, Button);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        connHanlder.start();
+        connListener.start();
     }
-    public void Load(){
-        EditText.setText(Ip);
+    public void Load(String code){
+        EditText.setText(code);
     }
 
     public void Save() {
@@ -294,35 +386,11 @@ class IoHandler {
     }
 
     public void OnClick(View view) {
-
-        if (!connected) {
-            Button.setText("Connecting!");
-            Save();
-            Conn = new Connection(EditText.getText().toString(), this);
-            Conn.Connect();
-        }
-        else{
-            Main.GetImage();
-        }
-
+        Main.GetImage();
     }
 
     public void onPicture(Bitmap pic){
-        Conn.Listener.Send(pic);
-
-    }
-
-    public void Message(int msg){
-        switch (msg){
-            case 0:
-                connected = true;
-                Button.setText("Connected!");
-                break;
-            case 1:
-                connected = false;
-                Conn = null;
-                Button.setText("Connection Lost!");
-        }
+        connListener.SendAll(pic);
     }
 }
 
@@ -338,41 +406,61 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         SharedPreferences sharedPreferences = getPreferences(MODE_PRIVATE);
 
-        final String ip = sharedPreferences.getString("IP", null);
+        final String code = sharedPreferences.getString("IP", null);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        connection = new IoHandler(ip, editor, findViewById(R.id.IpAdress), findViewById(R.id.ConnectBtn), findViewById(R.id.progressBar),this);
+        connection = new IoHandler(code, editor, findViewById(R.id.IpAdress), findViewById(R.id.ConnectBtn), findViewById(R.id.progressBar),this);
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+    }
 
-        String pic = "img.bmp";
-        String dir = getExternalCacheDir().getAbsolutePath();
-
-        System.out.println(dir+ "/"+pic);
-
-        Bitmap bmp = BitmapFactory.decodeFile(dir+ "/"+pic);
-        System.out.println(bmp);
-        connection.onPicture(bmp);
+    @Override
+    protected void onResume() {
+        super.onResume();
 
 
     }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+
+        connection.connListener.DisconnectAll();
+    }
+
 
     public void GetImage(){
         intent = new Intent(this, Camera.class);
 
-        this.startActivity(intent);
-
+        canmeraActivity.launch(intent);
 
 
     }
+
+
+    private ActivityResultLauncher<Intent> canmeraActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        String pic = "img.bmp";
+                        String dir = getExternalCacheDir().getAbsolutePath();
+
+                        System.out.println(dir+ "/"+pic);
+
+                        Bitmap bmp = BitmapFactory.decodeFile(dir+ "/"+pic);
+                        connection.onPicture(bmp);
+                    }
+                }
+            });
+
 
     @Override
     protected void onDestroy(){
@@ -384,5 +472,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         connection.Save();
+
+        connection.connListener.DisconnectAll();
     }
 }

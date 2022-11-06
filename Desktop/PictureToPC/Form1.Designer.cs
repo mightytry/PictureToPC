@@ -47,19 +47,18 @@
             this.button10 = new System.Windows.Forms.Button();
             this.button11 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.button12 = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.button14 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button7 = new System.Windows.Forms.Button();
             this.button8 = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -301,13 +300,12 @@
             // groupBox2
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.checkBox1);
+            this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.label6);
-            this.groupBox2.Controls.Add(this.button12);
             this.groupBox2.Controls.Add(this.progressBar1);
             this.groupBox2.Controls.Add(this.textBox1);
-            this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Location = new System.Drawing.Point(6, 19);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(229, 114);
@@ -316,10 +314,20 @@
             this.groupBox2.Text = "Networking";
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(37, 21);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(36, 15);
+            this.label4.TabIndex = 35;
+            this.label4.Text = "State:";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(10, 41);
+            this.label7.Location = new System.Drawing.Point(20, 80);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(61, 15);
             this.label7.TabIndex = 34;
@@ -330,27 +338,17 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(10, 63);
+            this.label6.Location = new System.Drawing.Point(37, 49);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(48, 15);
+            this.label6.Size = new System.Drawing.Size(38, 15);
             this.label6.TabIndex = 32;
-            this.label6.Text = "Partner:";
+            this.label6.Text = "Code:";
             this.label6.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.label6.Click += new System.EventHandler(this.label6_Click);
             // 
-            // button12
-            // 
-            this.button12.Location = new System.Drawing.Point(128, 84);
-            this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(66, 24);
-            this.button12.TabIndex = 31;
-            this.button12.Text = "Connect";
-            this.button12.UseVisualStyleBackColor = true;
-            this.button12.Click += new System.EventHandler(this.button12_Click);
-            // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(94, 41);
+            this.progressBar1.Location = new System.Drawing.Point(105, 80);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(100, 19);
             this.progressBar1.TabIndex = 33;
@@ -358,34 +356,12 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(11, 85);
+            this.textBox1.Location = new System.Drawing.Point(105, 46);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(111, 23);
+            this.textBox1.Size = new System.Drawing.Size(100, 23);
             this.textBox1.TabIndex = 30;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             this.textBox1.Leave += new System.EventHandler(this.textBox1_Leave);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(94, 19);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(36, 15);
-            this.label5.TabIndex = 29;
-            this.label5.Text = "None";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.label5.Click += new System.EventHandler(this.label5_Click);
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(10, 18);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(40, 15);
-            this.label4.TabIndex = 28;
-            this.label4.Text = "My IP:";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // groupBox4
             // 
@@ -463,6 +439,17 @@
             this.button9.UseVisualStyleBackColor = false;
             this.button9.MouseDown += new System.Windows.Forms.MouseEventHandler(this.markers_MouseDown);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoCheck = false;
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(105, 21);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(88, 19);
+            this.checkBox1.TabIndex = 0;
+            this.checkBox1.Text = "Connection";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -510,12 +497,7 @@
         private Button button11;
         private Button button10;
         private Label label3;
-        private Label label5;
-        private Label label4;
         private GroupBox groupBox2;
-        private Label label6;
-        private Button button12;
-        private TextBox textBox1;
         private ProgressBar progressBar1;
         private Label label7;
         private GroupBox groupBox5;
@@ -524,5 +506,9 @@
         private Label label8;
         private GroupBox groupBox3;
         private GroupBox groupBox4;
+        private Label label6;
+        private TextBox textBox1;
+        private Label label4;
+        private CheckBox checkBox1;
     }
 }

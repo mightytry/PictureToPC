@@ -1,4 +1,6 @@
 using PictureToPC;
+using PictureToPC.Networking;
+using System.Net;
 using System.Windows.Forms;
 
 namespace Forms
@@ -8,7 +10,7 @@ namespace Forms
         private readonly Dictionary<Button, MouseEventHandler> MoveEvent;
         private readonly Dictionary<Button, MouseEventHandler> UpEvent;
         private int ActiveCorner;
-        private Server Server;
+        private Connection Server;
         private List<Point[]> CornersList;
         public static int InternalResulution;
         public static int OutputResulution;
@@ -17,23 +19,30 @@ namespace Forms
         private readonly List<Image> imageQueue;
         private static readonly int[] ResulutionIndex = new int[] { 1920, 2560, 3840 };
         private readonly Config Config;
+        public CheckBox checkBox;
 
         public Form1()
         {
             InitializeComponent();
 
-            Server = new(42069, this, UpdateProgressBar);
+            checkBox = checkBox1;
 
-            Thread network = new(new ThreadStart(new Action(() => { Server.Loop(); })));
+            Server = new(this, UpdateProgressBar);
 
-            Config = new();
+            Discovery.Start(Server, textBox1);
+            Thread network = new(new ThreadStart(new Action(() => { Discovery.Recive(); })));
+
+            network.IsBackground = true;
 
             network.Start();
 
+            Config = new();
+
             comboBox1.SelectedIndex = Config.Data.OutputResulutionIndex;
             comboBox2.SelectedIndex = Config.Data.InternalResulutionIndex;
-
             textBox1.Text = Config.Data.PartnerIpAddress;
+
+            
 
             MoveEvent = new Dictionary<Button, MouseEventHandler>();
             UpEvent = new Dictionary<Button, MouseEventHandler>();
@@ -44,6 +53,7 @@ namespace Forms
 
             FormClosed += new FormClosedEventHandler((o, t) => { Server.Close(); });
         }
+        
         private void GetCorners()
         {
             List<Point[]> corners = ImagePrep.getCorners(pictureBox1.Image, InternalResulution);
@@ -269,11 +279,6 @@ namespace Forms
             }
         }
 
-        internal void SetLabel5(string v)
-        {
-            label5.Text = v;
-        }
-
         private void groupBox2_Enter(object sender, EventArgs e)
         {
 
@@ -297,22 +302,12 @@ namespace Forms
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
             Config.Data.PartnerIpAddress = textBox1.Text;
+            Config.Save();
         }
 
         private void textBox1_Leave(object sender, EventArgs e)
         {
             Config.Save();
-        }
-
-        private void button12_Click(object sender, EventArgs e)
-        {
-            if (Server.AddSendToClient(textBox1.Text, 42069))
-            {
-                MessageBox.Show("Added");
-            }
-            else {
-                MessageBox.Show("Failed");
-            }
         }
 
         private void progressBar1_Click(object sender, EventArgs e)

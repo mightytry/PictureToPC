@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -156,6 +157,7 @@ public class Camera extends AppCompatActivity {
             takePicture("img.bmp", true);
         }
         else{
+            this.setResult(Activity.RESULT_OK);
             finish();
         }
     }
