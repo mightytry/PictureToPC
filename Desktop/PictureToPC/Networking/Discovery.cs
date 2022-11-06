@@ -45,7 +45,14 @@ namespace PictureToPC.Networking
 
                 if (txtLog.Text == msg.code)
                 {
-                    conn.Loop(new IPEndPoint(IPAddress.Parse(msg.ip), msg.port));
+                    try
+                    {
+                        conn.Loop(new IPEndPoint(IPAddress.Parse(msg.ip), msg.port));
+                    }
+                    catch
+                    {
+                        return;
+                    }
                 }
             }
         }
