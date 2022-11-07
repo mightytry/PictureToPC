@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "PictureToPC"
-#define MyAppVersion "v0.5.1"
+#define MyAppVersion "v0"
 #define MyAppPublisher "Mees Studio"
-#define MyAppURL "https://github.com/mightytry/PictureToPC/releases/tag/v0.5.1"
+#define MyAppURL "https://github.com/mightytry/PictureToPC/releases/tag/installer"
 #define MyAppExeName "Main.exe"
 
 [Setup]
@@ -41,13 +41,15 @@ Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\ne
 Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Main.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Z:\Cloud\Programieren\Github\PictureToPC\Desktop\Updater\bin\Release\net6.0\version"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}\PictureToPC.*";
-Type: filesandordirs; Name: "{app}\Emgu.CV.*";
+Type: filesandordirs; Name: "{app}\Exe";
+Type: filesandordirs; Name: "{app}\Main.*";
 Type: filesandordirs; Name: "{app}\x64.*";
-Type: filesandordirs; Name: "{app}\Update.*";
+Type: filesandordirs; Name: "{app}\Newtonsoft.*";
+Type: filesandordirs; Name: "{app}\version";
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

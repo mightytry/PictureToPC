@@ -28,13 +28,13 @@ namespace PictureToPC.Networking
             int bytesRead;
             if (connected)
             {
-                try { bytesRead = stream.Read(buffer, 0, 32768); }
+                try { bytesRead = stream.Read(buffer, 0, 1024); }
                 catch (Exception)
                 {
                     Close();
                     return null;
                 }
-                return Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                return Encoding.UTF8.GetString(buffer, 0, bytesRead).TrimEnd();
             }
             return null;
         }
@@ -51,7 +51,7 @@ namespace PictureToPC.Networking
                     {
                         bytesRead += stream.Read(data, bytesRead, size - bytesRead);
                     }
-                    catch (Exception)
+                    catch
                     {
                         Close();
                         return null;
@@ -80,12 +80,33 @@ namespace PictureToPC.Networking
             connected = false;
 
         }
+        public void Timeout()
+        {
+            while (connected)
+            {
+                try
+                {
+                    stream.Write(new byte[1], 0, 1);
+                }
+                catch (Exception)
+                {
+                    Close();
+                    return;
+                    Console.WriteLine("HÄ");
+                }
+                Thread.Sleep(1000);
+            }
+        }
 
         public void Loop(IPEndPoint endPoint)
         {
             try { client = new TcpClient(endPoint.Address.ToString(), endPoint.Port); }
             catch { return; }
-            
+
+            Thread timeout = new Thread(Timeout);
+            timeout.IsBackground = true;
+            timeout.Start();
+
 
             stream = client.GetStream();
             connected = true;
@@ -94,8 +115,9 @@ namespace PictureToPC.Networking
 
             while (connected)
             {
-
+                Console.WriteLine("Recieving");
                 string? pictureData = Receive();
+
                 if (pictureData == null)
                 {
                     Close();
@@ -109,11 +131,13 @@ namespace PictureToPC.Networking
                 }
 
                 int s = int.Parse(pictureData);
+                Console.WriteLine(pictureData + " " + s);
 
                 if (s == -1)
                 {
                     continue;
                 }
+
 
                 byte[]? pictureBytes = Receive(s);
                 if (pictureBytes == null)
@@ -136,7 +160,6 @@ namespace PictureToPC.Networking
                 //Image img = dst.ToBitmap();
 
                 form.SetImg(im);
-
             }
         }
     }

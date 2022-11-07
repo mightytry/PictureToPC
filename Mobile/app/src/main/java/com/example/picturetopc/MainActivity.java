@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 
 class ConnHanlder extends Thread {
@@ -140,6 +141,12 @@ class ConnListener extends Thread
                 connections) {
             conn.Disconnect();
         }
+        try {
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        socket = null;
     }
 }
 
@@ -149,7 +156,7 @@ class ConnSender extends Thread {
     List<byte[]> Sendable;
 
     public ConnSender(Connection listener){
-        Sendable = new ArrayList<>();
+        Sendable = new LinkedList<>();
         Listener = listener;
     }
 
@@ -170,16 +177,15 @@ class ConnSender extends Thread {
             return;
         }
 
-        int size = 32768;
+        int size = 1024;
         byte[] send = Sendable.remove(0);
+        byte[] sdata = new byte[size];
 
         Listener.ConnListener.progressBar.setMax(send.length);
         try {
             for (int i = 0; i < send.length; i += size) {
                 Listener.ConnListener.progressBar.setProgress(i);
-                int to = i + size;
-                if (i + size >= send.length) to = send.length;
-                byte[] data = Arrays.copyOfRange(send, i, to);
+                byte[] data = Arrays.copyOfRange(send, i, i+size);
                 Listener.Output.write(data);
             }
         } catch (IOException e) {
@@ -188,8 +194,8 @@ class ConnSender extends Thread {
         }
     }
     public void KeepAlive(){
-        final byte[] b = "-1".getBytes(StandardCharsets.UTF_8);
-        Sendable.add(b);
+        final byte[] biteses = "-1".getBytes(StandardCharsets.UTF_8);
+        Sendable.add(biteses);
     }
 
     public void Send(Bitmap bmp){
@@ -411,27 +417,18 @@ public class MainActivity extends AppCompatActivity {
         final String code = sharedPreferences.getString("IP", null);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        System.out.println("why");
 
         connection = new IoHandler(code, editor, findViewById(R.id.IpAdress), findViewById(R.id.ConnectBtn), findViewById(R.id.progressBar),this);
-    }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
+        System.out.println("why???");
     }
 
     @Override
     protected void onStop(){
         super.onStop();
 
-        connection.connListener.DisconnectAll();
+        //connection.connListener.DisconnectAll();
     }
 
 
@@ -472,7 +469,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         connection.Save();
-
         connection.connListener.DisconnectAll();
     }
 }
