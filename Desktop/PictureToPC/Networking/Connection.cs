@@ -34,6 +34,7 @@ namespace PictureToPC.Networking
                     Close();
                     return null;
                 }
+                Console.WriteLine(string.Join(",", buffer));
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead).TrimEnd();
             }
             return null;
@@ -59,6 +60,7 @@ namespace PictureToPC.Networking
                     OnDataReceved((int)((float)bytesRead / size * 100));
                     old = bytesRead;
                 }
+                stream.Read(buffer, 0, 1024-(size%1024));
                 return data;
             }
             return null;
@@ -92,7 +94,6 @@ namespace PictureToPC.Networking
                 {
                     Close();
                     return;
-                    Console.WriteLine("HÄ");
                 }
                 Thread.Sleep(1000);
             }
@@ -111,10 +112,10 @@ namespace PictureToPC.Networking
             stream = client.GetStream();
             connected = true;
             form.Invoke(new Action(() => form.checkBox.Checked = true));
-            buffer = new byte[32768];
 
             while (connected)
             {
+                buffer = new byte[1024];
                 Console.WriteLine("Recieving");
                 string? pictureData = Receive();
 
@@ -131,7 +132,6 @@ namespace PictureToPC.Networking
                 }
 
                 int s = int.Parse(pictureData);
-                Console.WriteLine(pictureData + " " + s);
 
                 if (s == -1)
                 {
