@@ -113,6 +113,8 @@ namespace PictureToPC.Networking
             connected = true;
             form.Invoke(new Action(() => form.checkBox.Checked = true));
 
+            //TODO: disconnect phone when leaving app!
+
             while (connected)
             {
                 buffer = new byte[1024];
@@ -130,7 +132,7 @@ namespace PictureToPC.Networking
                     Close();
                     return;
                 }
-
+                
                 int s = int.Parse(pictureData);
 
                 if (s == -1)

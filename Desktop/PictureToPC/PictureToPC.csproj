@@ -42,10 +42,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.6.0.5131">
+    <PackageReference Include="Emgu.CV" Version="4.5.5.4823">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
-    <PackageReference Include="Emgu.CV.Bitmap" Version="4.6.0.5131" />
+    <PackageReference Include="Emgu.CV.Bitmap" Version="4.5.5.4823" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

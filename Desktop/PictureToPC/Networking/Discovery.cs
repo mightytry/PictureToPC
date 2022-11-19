@@ -45,16 +45,16 @@ namespace PictureToPC.Networking
 
                 if (txtLog.Text == msg.code)
                 {
-#if !RELEASE
+#if RELEASE
                     try
                     {
 #endif
                         conn.Loop(new IPEndPoint(IPAddress.Parse(msg.ip), msg.port));
-#if !RELEASE
+#if RELEASE
                     }
                     catch
                     {
-                        return;
+                        continue;
                     }
 #endif
                 }
