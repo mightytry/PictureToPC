@@ -139,8 +139,9 @@ namespace Main
 
             if (Directory.Exists("Update"))
             {
-                 CopyFilesRecursively("Update", "Exe");
-                 Directory.Delete("Update", true);
+                CheckPermission();
+                CopyFilesRecursively("Update", "Exe");
+                Directory.Delete("Update", true);
             }
 
             Get_Version();
