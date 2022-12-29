@@ -1,6 +1,7 @@
 ﻿using Forms;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -14,6 +15,7 @@ namespace PictureToPC.Networking
         private TcpClient client;
         private NetworkStream stream;
         public bool connected;
+        public bool connecting;
         public string connCode;
         private byte[] buffer;
         private readonly Form1 form;
@@ -34,7 +36,7 @@ namespace PictureToPC.Networking
                     Close();
                     return null;
                 }
-                Console.WriteLine(string.Join(",", buffer));
+                Debug.WriteLine(string.Join(",", buffer));
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead).TrimEnd();
             }
             return null;
@@ -101,8 +103,9 @@ namespace PictureToPC.Networking
 
         public void Loop(IPEndPoint endPoint)
         {
+            connecting = true;
             try { client = new TcpClient(endPoint.Address.ToString(), endPoint.Port); }
-            catch { return; }
+            catch { return; connecting = false; }
 
             Thread timeout = new Thread(Timeout);
             timeout.IsBackground = true;
@@ -110,15 +113,14 @@ namespace PictureToPC.Networking
 
 
             stream = client.GetStream();
+            connecting = false;
             connected = true;
             form.Invoke(new Action(() => form.checkBox.Checked = true));
 
-            //TODO: disconnect phone when leaving app!
-
+            
             while (connected)
             {
                 buffer = new byte[1024];
-                Console.WriteLine("Recieving");
                 string? pictureData = Receive();
 
                 if (pictureData == null)

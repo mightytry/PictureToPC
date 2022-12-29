@@ -17,7 +17,16 @@ namespace PictureToPC
 
         private void load()
         {
-            Data = JsonConvert.DeserializeObject<Data>(File.ReadAllText(FilePath));
+            string data = File.ReadAllText(FilePath);
+            if (data == "")
+            {
+                Data = new Data();
+                save();
+            }
+            else
+            {
+                Data = JsonConvert.DeserializeObject<Data>(data);
+            }
         }
 
         public void Save()

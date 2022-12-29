@@ -2,6 +2,7 @@
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Forms;
+using System.Diagnostics;
 using Point = System.Drawing.Point;
 
 namespace PictureToPC
@@ -105,7 +106,7 @@ namespace PictureToPC
                 diff[i] = corners[i].X - corners[i].Y;
             }
 
-            Console.WriteLine(string.Join("", corners));
+            Debug.WriteLine(string.Join("", corners));
 
             tl = corners[Array.IndexOf(sum, sum.Min())];
             br = corners[Array.IndexOf(sum, sum.Max())];
@@ -117,7 +118,7 @@ namespace PictureToPC
             tr.Offset((int)((tr.X * f) - tr.X), (int)((tr.Y * f) - tr.Y));
             bl.Offset((int)((bl.X * f) - bl.X), (int)((bl.Y * f) - bl.Y));
             br.Offset((int)((br.X * f) - br.X), (int)((br.Y * f) - br.Y));
-
+            
             return new Point[] { tl, tr, bl, br };
         }
 

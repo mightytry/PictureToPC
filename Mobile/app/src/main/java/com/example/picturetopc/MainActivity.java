@@ -211,47 +211,6 @@ class ConnSender extends Thread {
 }
 
 
-class ConnReader extends Thread
-{
-    Connection Listener;
-
-    public ConnReader(Connection listener){
-        Listener = listener;
-    }
-
-    public void run() {
-
-        while (!Listener.Stop){
-            try {
-                byte[] bytes = new byte[1024];
-
-                if (Listener.Input.read(bytes, 0, 1024) == -1) Listener.Disconnect();
-
-                int i;
-                for (i = 0; i < bytes.length && bytes[i] != 0; i++) { }
-
-
-                String msg = new String(bytes, 0, i);
-
-
-                switch (msg){
-                    case "ready":
-                        //Listener.Blocked = false;
-                        break;
-
-                    default:
-                        Listener.Disconnect();
-                        break;
-                }
-
-
-            } catch (IOException e) {
-                Listener.Disconnect();
-            }
-        }
-    }
-}
-
 class ConnTimeout extends Thread {
     ConnSender Sender;
 
@@ -417,18 +376,26 @@ public class MainActivity extends AppCompatActivity {
         final String code = sharedPreferences.getString("IP", null);
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        System.out.println("why");
 
         connection = new IoHandler(code, editor, findViewById(R.id.IpAdress), findViewById(R.id.ConnectBtn), findViewById(R.id.progressBar),this);
-
-        System.out.println("why???");
     }
 
     @Override
-    protected void onStop(){
-        super.onStop();
+    protected void onDestroy(){
+        super.onDestroy();
+        String pic = "img.bmp";
+        String dir = getExternalCacheDir().getAbsolutePath();
+        new File(dir + "/" + pic).delete();
 
-        //connection.connListener.DisconnectAll();
+        connection.connListener.DisconnectAll();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        connection.Save();
+
     }
 
 
@@ -450,25 +417,10 @@ public class MainActivity extends AppCompatActivity {
                         String pic = "img.bmp";
                         String dir = getExternalCacheDir().getAbsolutePath();
 
-                        System.out.println(dir+ "/"+pic);
-
                         Bitmap bmp = BitmapFactory.decodeFile(dir+ "/"+pic);
                         connection.onPicture(bmp);
                     }
                 }
             });
 
-
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        String pic = "img.bmp";
-        String dir = getExternalCacheDir().getAbsolutePath();
-        new File(dir+ "/"+pic).delete();
-
-
-        connection.Save();
-        connection.connListener.DisconnectAll();
-    }
 }

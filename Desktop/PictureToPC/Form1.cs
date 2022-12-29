@@ -1,6 +1,7 @@
 using PictureToPC;
 using PictureToPC.Networking;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Windows.Forms;
 
 namespace Forms
@@ -29,13 +30,6 @@ namespace Forms
 
             Server = new(this, UpdateProgressBar);
 
-            Discovery.Start(Server, textBox1);
-            Thread network = new(new ThreadStart(new Action(() => { Discovery.Recive(); })));
-
-            network.IsBackground = true;
-
-            network.Start();
-
             Config = new();
 
             comboBox1.SelectedIndex = Config.Data.OutputResulutionIndex;
@@ -50,6 +44,7 @@ namespace Forms
             imageQueue = new List<Image>();
 
             Resize += new EventHandler(ResizeMarkers);
+            //NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(Discovery.NetworkAddressChanged); //maybe
 
             FormClosed += new FormClosedEventHandler((o, t) => { Server.Close(); });
         }
@@ -330,7 +325,7 @@ namespace Forms
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            Discovery.Start(Server, textBox1);
         }
 
         private void button14_Click(object sender, EventArgs e)
