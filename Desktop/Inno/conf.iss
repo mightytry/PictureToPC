@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "PictureToPC"
-#define MyAppVersion "v0"
+#define MyAppVersion "v1"
 #define MyAppPublisher "Mees Studio"
 #define MyAppURL "https://github.com/mightytry/PictureToPC/releases/tag/installer"
 #define MyAppExeName "Main.exe"
